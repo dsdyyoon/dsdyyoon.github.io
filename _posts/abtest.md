@@ -1,0 +1,240 @@
+### 데이터로드
+
+- group : 각 user들이 총 A, B,C의 세걔의 그룹 중 하나에 속해있음 
+- is_purchas : 테스트 결과로 상품을 구매했는지 그렇지 않았는지를 표시 
+- user_id : user들의 unique한 key값
+
+
+```python
+import pandas as pd
+data = pd.DataFrame(columns = ['group', 'is_purchase'])
+data['group'] = ['A','A','B','B','C','A','A','C','A','C','C','B','A','C','A','B']
+data['is_purchase'] = ['no','yes','yes','yes','no','yes','no','yes','yes','yes','yes','yes','yes','no','no','no']
+data['user_id'] = data.index
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>group</th>
+      <th>is_purchase</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>B</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>B</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>C</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>A</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>A</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>C</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>A</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>C</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>C</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>B</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>A</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>C</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>A</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>B</td>
+      <td>no</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+### group, is_purchasd 열을 기준으로 groupby를 통해 카운드 함
+
+
+```python
+purchase  = data.groupby(['group','is_purchase']).count()
+purchase
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>user_id</th>
+    </tr>
+    <tr>
+      <th>group</th>
+      <th>is_purchase</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="2" valign="top">A</th>
+      <th>no</th>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>yes</th>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">B</th>
+      <th>no</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>yes</th>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">C</th>
+      <th>no</th>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>yes</th>
+      <td>3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+### 내가 분석하고자 하는 a/b테스트의 측정값은 범주형이기 떄문에 카이제곱 통계량을 사용함.
+- (샀거나 안샀거나)
+
+
+```python
+contingency = [[3,4],
+              [1,3],
+              [2,3]]
+
+from scipy.stats import chi2_contingency
+
+chi2, pval, dof, expected = chi2_contingency(contingency)
+print(pval)
+```
+
+    0.8328871311145208
+
+
+
+```python
+### p-value가 0.05보다 크기떄문에 귀무가설을 기각함.
+ho: 집단 간의 차이가 없다. 
+h1: 집단 간의 차이가 있다. 
+    
+따라서 집단 간의 차이가 있음을 파악...
+```
+
+
+```python
+
+```
+
+
+```python
+# 적합도 검정
+관측값이 특정 분포를 따를까? 
+기대분포란 우리가 알고있는 이항, 지수, 포아송이 해당되며
+분포를 알게되면 이에 대한 평균과 분산을 구할 수 있음 
+
+
+```
